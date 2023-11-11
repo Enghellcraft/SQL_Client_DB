@@ -113,11 +113,59 @@ SELECT * FROM Clientes
 WHERE rubro IS NOT NULL;
 
 -- F)
-SELECT * FROM Clientes AS c
-RIGHT OUTER JOIN Rubro AS r ON c.idCliente = r.idRubro;
+SELECT c.idCliente, c.nombreCliente, c.Domicilio, c.mail, c.cantidadEmpleados, r.Rubro,  r.idRubro FROM Clientes c
+LEFT JOIN Rubro r ON c.rubro = r.idRubro
+UNION 
+SELECT null, null, null, null, null, r.Rubro, r.idRubro FROM Rubro r
+LEFT JOIN Clientes c ON c.rubro = r.idRubro
+WHERE c.idCliente IS NULL;
 
 -- G)
+SELECT c.idCliente, c.nombreCliente, c.Domicilio, c.mail, c.cantidadEmpleados, r.Rubro,  r.idRubro FROM Clientes c
+INNER JOIN Rubro r ON c.rubro = r.idRubro
+UNION 
+SELECT c.idCliente, c.nombreCliente, c.Domicilio, c.mail, c.cantidadEmpleados, null, null FROM Clientes c
+LEFT JOIN Rubro r ON c.rubro = r.idRubro
+WHERE r.idRubro IS NULL
+UNION
+SELECT null, null, null, null, null, r.Rubro, r.idRubro FROM Clientes c
+RIGHT JOIN Rubro r ON c.rubro = r.idRubro
+WHERE c.idCliente IS NULL;
 
+-- H)
+SELECT c.idCLiente, c.nombreCliente, c.rubro, r.Rubro,
+       SUM(cs.CantSucursalesCapital + cs.CantSucursalesInterior) AS TotalSucursales
+FROM Clientes c
+INNER JOIN Rubro r ON c.rubro = r.idRubro
+INNER JOIN ClienteSucursales cs ON c.idCLiente = cs.cliente
+GROUP BY c.idCLiente
+HAVING TotalSucursales > 15;
+
+-- I)
+SELECT c.idCLiente, c.nombreCliente, c.rubro, r.Rubro,
+       SUM(cs.CantSucursalesCapital + cs.CantSucursalesInterior) AS TotalSucursales
+FROM Clientes c
+LEFT OUTER JOIN Rubro r ON c.rubro = r.idRubro
+LEFT OUTER JOIN ClienteSucursales cs ON c.idCLiente = cs.cliente
+GROUP BY c.idCliente
+HAVING TotalSucursales > 15 OR c.rubro IS NOT NULL;
+
+-- J)
+SELECT r.Rubro, SUM(c.cantidadEmpleados) AS totalEmpleados FROM Rubro r
+LEFT JOIN Clientes c 
+ON r.idRubro = c.rubro
+GROUP BY r.Rubro;
+
+-- K)
+SELECT c.idCliente, c.nombreCliente, c.rubro FROM Clientes c 
+INNER JOIN Rubro r
+ON r.idRubro = c.rubro
+HAVING c.rubro IN (1,2,4);
+
+-- L)
+SELECT cs.tipoRelacionSucursalCliente, SUM(cs.CantSucursalesInterior) AS CantSucursales, AVG(cs.CantSucursalesCapital) AS promCap FROM ClienteSucursales cs
+GROUP BY cs.tipoRelacionSucursalCliente
+HAVING promCap < 16;
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
